@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct dados
+{
+    char nome[50];
+    int dia;
+    int mes;
+    int ano;
+    int idade;
+} Dados;
+
+Dados info[14];
+
+int main()
+{
+    FILE *in, *out;
+    char n[20], nascimento[30];
+    char dia[6], mes[6], ano[6];
+    char barra[2];
+    int maisVelha = -1, maisNova = 999;
+    int i = 0;
+    int maiorI, menorI;
+
+    in = fopen("dados.txt", "r");
+    if (in == NULL)
+    {
+        printf("Arquivo não encontrado\n");
+        return 0;
+    }
+
+    fscanf(in, "%s %s", n, nascimento);
+
+    while (!feof(in))
+    {
+        fscanf(in, "%s %s %c %s %c %s", info[i].nome, dia, &barra[0], mes, &barra[1], ano);
+
+       
+        info[i].dia = atoi(dia);
+        info[i].mes = atoi(mes);
+        info[i].ano = atoi(ano);
+
+        info[i].idade = 2023 - info[i].ano;
+
+        if (strcmp(nascimento, "00/00/0000") != 0) {
+            if (strcmp(nascimento, dia) < 0 ||
+                (strcmp(nascimento, dia) == 0 && strcmp(nascimento+3, mes) < 0) ||
+                (strcmp(nascimento, dia) == 0 && strcmp(nascimento+3, mes) == 0 && strcmp(nascimento+6, ano) < 0)) {
+                strcpy(nascimento, dia);
+                strcat(nascimento, "/");
+                strcat(nascimento, mes);
+                strcat(nascimento, "/");
+                strcat(nascimento, ano);
+            }
+        } else {
+            strcpy(nascimento, dia);
+            strcat(nascimento, "/");
+            strcat(nascimento, mes);
+            strcat(nascimento, "/");
+            strcat(nascimento, ano);
+        }
+
+        if (info[i].idade > maisVelha) {
+            maisVelha = info[i].idade;
+            maiorI = i;
+        }
+        if (info[i].idade < maisNova || i == 0) {
+            maisNova = info[i].idade;
+            menorI = i;
+        }
+
+        i++;
+    }
+    fclose(in);
+
+    out = fopen("saida.txt", "w");
+
+    for (int j = 0; j < i; j++)
+    {
+        fprintf(out, "%s %i / %i / %i - %i \n", info[j].nome, info[j].dia, info[j].mes, info[j].ano, info[j].idade);
+    }
+    fprintf(out, "A pessoa mais velha é %s com %i anos\n", info[maiorI].nome, info[maiorI].idade);
+    fprintf(out, "A pessoa mais nova é %s com %i anos", info[menorI].nome, info[menorI].idade);
+    fclose(out);
+
+    return 0;
+}
